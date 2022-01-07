@@ -1,40 +1,79 @@
 import { execFileSync } from "child_process";
+import { writeFileSync } from "fs";
 import { join } from "path";
 
-import { resolution } from "../config/image";
-
+import { renderPath } from "../config/paths";
 import { getArgument } from "../utils/helper";
 
-export const AddBackgroundMusic = async (
-  videoPath: string,
-  audioPath: string,
-  outputPath: string
-) => {
+type AddBackgroundMusic = (args: {
+  videoPath: string;
+  audioPath: string;
+  outputPath: string;
+}) => void;
+
+export const addBackgroundMusic: AddBackgroundMusic = async ({
+  videoPath,
+  audioPath,
+  outputPath,
+}) => {
   const ffmpeg = getArgument("FFMPEG") ?? "ffmpeg";
 
-  const args = [
+  const audioFiles = [];
+  for (let i = 0; i < 20; i++) {
+    audioFiles.push(`file '${audioPath}'`);
+  }
+
+  const audioListPath = join(renderPath, "audio-list.txt");
+
+  writeFileSync(audioListPath, audioFiles.join("\n"));
+
+  const backgroundAudioPath = join(renderPath, "background-music.wav");
+
+  mergeFiles({
+    exportPath: renderPath,
+    listPath: audioListPath,
+    video: false,
+    title: "music",
+  });
+
+  const argz = [
     "-i",
-    videoPath,
-    "-filter_complex",
-    `"amovie=${audioPath}:loop=0,asetpts=N/SR/TB[aud];[0:a][aud]amix[a]"`,
-    "-map",
-    "0:v",
-    "-map",
-    "'[a]'",
-    "-c:v",
-    "copy",
-    "-c:a",
-    "aac",
-    "-b:a",
-    "256k",
-    "-shortest",
-    outputPath,
+    join(renderPath, "music.wav"),
+    "-filter:a",
+    "volume=0.05",
+    backgroundAudioPath,
   ];
 
   try {
-    execFileSync(ffmpeg, args, { stdio: "pipe" });
+    execFileSync(ffmpeg, argz, { stdio: "pipe" });
   } catch (error) {
-    // console.log(error);
+    console.log(error);
+  }
+
+  const arg = [
+    "-y",
+    "-i",
+    videoPath,
+    "-i",
+    backgroundAudioPath,
+    "-filter_complex",
+    "[0:a][1:a]amerge=inputs=2[a]",
+    "-map",
+    "0:v",
+    "-map",
+    "[a]",
+    "-c:v",
+    "copy",
+    "-ac",
+    "2",
+    "-shortest",
+    join(outputPath, "video.mp4"),
+  ];
+
+  try {
+    execFileSync(ffmpeg, arg, { stdio: "pipe" });
+  } catch (error) {
+    console.log(error);
   }
 
   // console.log("process-video-done");
@@ -94,16 +133,22 @@ export const generateVideo: GenerateVideo = ({
   }
 };
 
-type MergeVideos = (args: {
+type MergeFiles = (args: {
   listPath: string;
   exportPath: string;
   title?: string;
+  video?: boolean;
 }) => void;
 
 /**
  * Merge Videos together
  */
-export const mergeVideos: MergeVideos = ({ listPath, exportPath, title }) => {
+export const mergeFiles: MergeFiles = ({
+  listPath,
+  exportPath,
+  title,
+  video = true,
+}) => {
   const ffmpeg = getArgument("FFMPEG") ?? "ffmpeg";
 
   const args = [
@@ -115,7 +160,7 @@ export const mergeVideos: MergeVideos = ({ listPath, exportPath, title }) => {
     listPath,
     "-c",
     "copy",
-    join(exportPath, `${title ?? "video"}.mp4`),
+    join(exportPath, `${title ?? "video"}.${video ? "mp4" : "wav"}`),
   ];
 
   try {

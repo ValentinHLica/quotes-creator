@@ -1,11 +1,47 @@
 import cluster from "cluster";
 import { join } from "path";
-import { existsSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 
-import { renderPath, tempPath } from "../config/paths";
+import Jimp from "jimp";
 
-import { getContent, getFolders, spreadWork } from "../utils/helper";
-import { mergeVideos } from "./lib";
+import { assetsPath, renderPath, tempPath } from "../config/paths";
+import { resolution } from "../config/image";
+
+import { getVoice, generateAudioFile } from "../audio/lib";
+import { createOutroImage } from "../image/lib";
+import {
+  getContent,
+  getDuration,
+  getFolders,
+  spreadWork,
+} from "../utils/helper";
+import { addBackgroundMusic, generateVideo, mergeFiles } from "./lib";
+
+const createOutro = async () => {
+  const outroPath = join(renderPath, "outro");
+  const imagePath = join(outroPath, "image.png");
+  const textFilePath = join(outroPath, "text.txt");
+
+  await createOutroImage();
+
+  const voice = getVoice();
+
+  generateAudioFile({
+    voice,
+    exportPath: outroPath,
+    textFilePath,
+  });
+
+  const duration = getDuration(join(outroPath, "subtitle.srt"));
+
+  generateVideo({
+    exportPath: outroPath,
+    image: imagePath,
+    audio: join(outroPath, "audio.wav"),
+    title: "outro",
+    duration,
+  });
+};
 
 const generateQuoteVideo = async () => {
   return new Promise((resolve) => {
@@ -47,7 +83,7 @@ const generateQuoteVideo = async () => {
 };
 
 const mergeQuotes = async () => {
-  const { exportPath } = getContent();
+  const outroPath = join(renderPath, "outro");
   const folders = getFolders(renderPath);
 
   const listPath = join(renderPath, "list.txt");
@@ -56,17 +92,29 @@ const mergeQuotes = async () => {
     .filter((folder) => {
       return existsSync(join(renderPath, folder, "video.mp4"));
     })
-    .map((folder) => `file '${join(renderPath, folder, "video.mp4")}'`);
+    .map((folder) => `file '${join(renderPath, folder, "video.mp4")}'`)
+    .concat(`file '${join(outroPath, "outro.mp4")}'`);
 
   writeFileSync(listPath, videos.join(" \n"));
 
-  mergeVideos({ listPath, exportPath });
+  mergeFiles({ listPath, exportPath: renderPath });
 };
 
 export default async () => {
+  const { exportPath } = getContent();
+
   // Generate video for each comment
   await generateQuoteVideo();
 
+  // Create Outro
+  await createOutro();
+
   // Merge Videos
   await mergeQuotes();
+
+  addBackgroundMusic({
+    videoPath: join(renderPath, "video.mp4"),
+    audioPath: join(exportPath, "audio.mp3"),
+    outputPath: exportPath,
+  });
 };

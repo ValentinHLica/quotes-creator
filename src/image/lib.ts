@@ -1,11 +1,13 @@
 import { join } from "path";
-import { readdirSync } from "fs";
+import { mkdirSync, readdirSync, writeFileSync } from "fs";
 
 import Jimp from "jimp";
 
-import { assetsPath } from "../config/paths";
+import { assetsPath, renderPath } from "../config/paths";
 import { resolution } from "../config/image";
 import { Quote, QuoteAssets } from "../interface/content";
+
+import { getContent } from "../utils/helper";
 
 type CreateQuote = (args: {
   quote: Quote;
@@ -153,4 +155,56 @@ export const createQuote: CreateQuote = async ({
   } catch (error) {
     console.log(error);
   }
+};
+
+export const createOutroImage = async () => {
+  const { assets } = getContent();
+  const outroPath = join(renderPath, "outro");
+
+  mkdirSync(outroPath);
+
+  const outro =
+    "Make sure to subscribe and turn on notification, See you on another video, Bye";
+
+  // Generate Audio File
+  const textFilePath = join(outroPath, "text.txt");
+
+  writeFileSync(textFilePath, outro);
+
+  const { width, height } = resolution;
+
+  const image = new Jimp(width, height, "#000000");
+
+  // Add Background
+  if (assets.background) {
+    const backgroundImage = await Jimp.read(assets.background);
+
+    if (backgroundImage.getWidth() < backgroundImage.getHeight()) {
+      backgroundImage.flip(true, false);
+    }
+
+    backgroundImage.cover(width, height);
+
+    image.composite(backgroundImage, 0, 0);
+  }
+
+  const font = await Jimp.loadFont(join(assetsPath, "font", "90.fnt"));
+
+  const outroText = `Thank you for watching`;
+
+  const outroTextWidth = Jimp.measureText(font, outroText);
+  const outroTextHeight = Jimp.measureTextHeight(
+    font,
+    outroText,
+    outroTextWidth + 100
+  );
+  const outroTextImage = new Jimp(outroTextWidth, outroTextHeight);
+  outroTextImage.print(font, 0, 0, outroText);
+  outroTextImage.color([{ apply: "xor", params: ["#ffffff"] }]);
+
+  image.composite(outroTextImage, width / 2 - outroTextWidth / 2, 150);
+
+  const imagePath = join(outroPath, "image.png");
+
+  await image.writeAsync(imagePath);
 };
