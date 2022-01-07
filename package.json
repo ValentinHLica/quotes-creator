@@ -1,0 +1,36 @@
+{
+  "name": "daily-quotes",
+  "version": "1.0.0",
+  "description": "Create videos from quotes",
+  "main": "build/index.js",
+  "bin": "build/index.js",
+  "scripts": {
+    "copy:assets": "cp -R src/assets build",
+    "build:app": "rm -rf build dist && tsc -p . && npm run copy:assets",
+    "build:exe": "rm -rf ./reddit-video-creator.exe && pkg .",
+    "build": "npm run build:app && npm run build:exe",
+    "start": "npm run build:app && node ./build/index.js CONTENT=./content.json VOICE=Daniel",
+    "test": "node test/index.js"
+  },
+  "keywords": [],
+  "author": "Valentin Lica",
+  "license": "ISC",
+  "dependencies": {
+    "jimp": "^0.16.1",
+    "pkg": "^5.5.1"
+  },
+  "pkg": {
+    "scripts": "build/**/*.js",
+    "targets": [
+      "node16-win-x64"
+    ],
+    "assets": [
+      "build/assets/**/*"
+    ],
+    "outputPath": "./"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.12",
+    "typescript": "^4.5.3"
+  }
+}
