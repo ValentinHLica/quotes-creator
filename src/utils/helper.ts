@@ -59,11 +59,11 @@ export const deleteFolder = (path: string) => {
  * Reset Temp folder for new process
  */
 export const resetTemp = async () => {
-  deleteFolder(renderPath);
-  deleteFolder(dataPath);
+  deleteFolder(tempPath);
 
-  mkdirSync(renderPath);
+  mkdirSync(tempPath);
   mkdirSync(dataPath);
+  mkdirSync(renderPath);
 };
 
 /**

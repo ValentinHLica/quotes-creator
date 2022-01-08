@@ -1,32 +1,20 @@
-import { mkdir, mkdirSync, readFileSync } from "fs";
-import { join } from "path";
+import { readFileSync } from "fs";
 
-import { renderPath } from "../config/paths";
 import { Quote, QuoteAssets } from "../interface/content";
 
-import { createQuote } from "./lib";
+import { createBackgroundImage, createQuotes } from "./lib";
 
 const init = async () => {
-  const data = JSON.parse(
+  const { quotes, assets } = JSON.parse(
     readFileSync(process.argv.slice(2)[0]).toString()
   ) as {
     quotes: Quote[];
     assets: QuoteAssets;
   };
 
-  for (const quote of data.quotes) {
-    mkdirSync(join(renderPath, quote.id + ""));
+  await createBackgroundImage(assets);
 
-    const exportPath = join(renderPath, quote.id + "", "image.png");
-
-    await createQuote({
-      quote,
-      assets: data.assets,
-      exportPath,
-    });
-
-    console.log("image-generated");
-  }
+  await createQuotes(quotes);
 
   // Kill Worker
   process.exit();

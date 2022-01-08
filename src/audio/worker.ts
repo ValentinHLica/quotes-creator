@@ -25,7 +25,6 @@ const init = async () => {
     generateAudioFile({
       exportPath,
       textFilePath,
-      voice: data.voice,
     });
 
     console.log("audio-generated");

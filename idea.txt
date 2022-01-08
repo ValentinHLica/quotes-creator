@@ -1,2 +1,7 @@
 https://www.youtube.com/watch?v=yqmu6xXioC8
 merr imazhe dhe quota te nji personi dhe krijo video
+
+
+8 Cpus:
+    1. Battery - Render: 1:07.505 (m:ss.mmm) - Render: 1:04.643 (m:ss.mmm)
+    2. Plug - Render: 47.689s

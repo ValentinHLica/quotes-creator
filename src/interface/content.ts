@@ -1,6 +1,7 @@
 export interface QuoteAssets {
   avatar: string;
   background?: string;
+  audio: string;
 }
 
 export interface Quote {

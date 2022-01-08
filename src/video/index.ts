@@ -7,7 +7,7 @@ import Jimp from "jimp";
 import { assetsPath, renderPath, tempPath } from "../config/paths";
 import { resolution } from "../config/image";
 
-import { getVoice, generateAudioFile } from "../audio/lib";
+import { generateAudioFile } from "../audio/lib";
 import { createOutroImage } from "../image/lib";
 import {
   getContent,
@@ -24,10 +24,7 @@ const createOutro = async () => {
 
   await createOutroImage();
 
-  const voice = getVoice();
-
   generateAudioFile({
-    voice,
     exportPath: outroPath,
     textFilePath,
   });
@@ -101,7 +98,7 @@ const mergeQuotes = async () => {
 };
 
 export default async () => {
-  const { exportPath } = getContent();
+  const { exportPath, assets } = getContent();
 
   // Generate video for each comment
   await generateQuoteVideo();
@@ -114,7 +111,7 @@ export default async () => {
 
   addBackgroundMusic({
     videoPath: join(renderPath, "video.mp4"),
-    audioPath: join(exportPath, "audio.mp3"),
+    audioPath: assets.audio,
     outputPath: exportPath,
   });
 };

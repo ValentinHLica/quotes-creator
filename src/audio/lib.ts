@@ -30,35 +30,37 @@ export const getVoice = () => {
 /**
  * Generate Audio from text
  */
-export const generateAudioFile = ({ textFilePath, exportPath, voice }) => {
-  let selectedVoice = voice ?? getVoice();
+export const generateAudioFile = ({ textFilePath, exportPath }) => {
+  let selectedVoice = getVoice();
 
   const balcon = getArgument("BALCON") ?? "balcon";
 
   const args = [
     "-f",
-    textFilePath,
+    `'${textFilePath}'`,
     "-w",
-    `${join(exportPath, "audio.wav")}`,
+    `'${join(exportPath, "audio.wav")}'`,
     "-n",
     selectedVoice,
-    "--lrc-length",
-    "400",
-    "--srt-length",
-    "400",
-    "-srt",
-    "--srt-enc",
-    "utf8",
-    "--srt-fname",
-    `${join(exportPath, "subtitle.srt")}`,
-    "--ignore-url",
-    "--silence-end",
-    "1000",
+    // "--lrc-length",
+    // "400",
+    // "--srt-length",
+    // "400",
+    // "-srt",
+    // "--srt-enc",
+    // "utf8",
+    // "--srt-fname",
+    // `'${join(exportPath, "subtitle.srt")}'`,
+    // "--ignore-url",
+    // "--silence-end",
+    // "1000",
   ];
+
+  console.log(balcon);
 
   try {
     execFileSync(balcon, args);
   } catch (error) {
-    // console.log(error);
+    console.log(error);
   }
 };
