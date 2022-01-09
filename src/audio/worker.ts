@@ -7,14 +7,12 @@ import { Quote } from "../interface/content";
 import { generateAudioFile } from "./lib";
 
 const init = async () => {
-  const data = JSON.parse(process.argv.slice(2)[0]) as {
+  const { quotesPath, voice } = JSON.parse(process.argv.slice(2)[0]) as {
     quotesPath: string;
     voice: string;
   };
 
-  const quotes = JSON.parse(
-    readFileSync(data.quotesPath).toString()
-  ) as Quote[];
+  const quotes = JSON.parse(readFileSync(quotesPath).toString()) as Quote[];
 
   for (const quote of quotes) {
     const exportPath = join(renderPath, quote.id + "");
@@ -25,6 +23,7 @@ const init = async () => {
     generateAudioFile({
       exportPath,
       textFilePath,
+      voice,
     });
 
     console.log("audio-generated");

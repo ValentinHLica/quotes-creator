@@ -26,5 +26,4 @@ dist
 build
 *.exe
 *.mp4
-content.json
 content

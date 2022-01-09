@@ -12,8 +12,6 @@ import { getContent } from "../utils/helper";
 export const createBackgroundImage = async (assets: QuoteAssets) => {
   const { width, height } = resolution;
 
-  const quoteMaxWidth = width / 1.7 + 80;
-
   // Check Requirements
   const requirements = [
     {
@@ -60,10 +58,11 @@ export const createBackgroundImage = async (assets: QuoteAssets) => {
 
   // Add Author Image
   const authorImage = await Jimp.read(assets.avatar);
+  const authorImageWidth = 870;
 
-  authorImage.resize(width - quoteMaxWidth, Jimp.AUTO);
+  authorImage.resize(authorImageWidth, Jimp.AUTO);
 
-  image.composite(authorImage, width - quoteMaxWidth, 0);
+  image.composite(authorImage, width - authorImageWidth, 0);
 
   const exportPath = join(renderPath, "background.png");
 
@@ -89,44 +88,20 @@ export const createQuotes = async (quotes: Quote[]) => {
     // Print Quote and details
     const quoteMaxWidth = width / 1.7;
     const fonts = await loadFonts();
-
-    const maxQuoteHeight = height - 200;
+    const margin = {
+      top: 100,
+      right: 0,
+      bottom: 100,
+      left: 80,
+    };
 
     for (const quote of quotes) {
-      const image = await Jimp.read(backgroundImagePath);
+      const background = await Jimp.read(backgroundImagePath);
+      const imageHeight = height - (margin.top + margin.bottom);
+      const image = new Jimp(quoteMaxWidth, imageHeight);
+      const quoteText = `"${quote.text}"`;
 
-      let quoteFont = null;
-      let quoteHeight = 0;
-
-      for (const font of fonts) {
-        const textHeight = Jimp.measureTextHeight(
-          font,
-          quote.text,
-          quoteMaxWidth
-        );
-
-        if (textHeight < maxQuoteHeight && textHeight > quoteHeight) {
-          quoteFont = font;
-          quoteHeight = textHeight;
-        }
-      }
-
-      const quoteImage = new Jimp(quoteMaxWidth, quoteHeight);
-      quoteImage.print(
-        quoteFont,
-        0,
-        0,
-        {
-          text: quote.text,
-          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
-        },
-        quoteImage.getWidth()
-      );
-      quoteImage.color([{ apply: "xor", params: ["#ffffff"] }]);
-
-      let detailsImage: Jimp | null = null;
-      let detailsTotalHeight: number = 0;
+      let detailHeight: number = 0;
 
       if (quote.author || quote.description) {
         const detailsFont = await Jimp.loadFont(
@@ -145,65 +120,90 @@ export const createQuotes = async (quotes: Quote[]) => {
             )
           : 0;
 
-        const totalHeight = authorTextHeight + descriptionTextHeight;
+        detailHeight = authorTextHeight + descriptionTextHeight;
 
-        if (totalHeight > 0) {
-          detailsTotalHeight = totalHeight;
-
-          detailsImage = new Jimp(quoteMaxWidth, totalHeight);
-
+        if (detailHeight > 0) {
           if (quote.author) {
-            detailsImage.print(
+            image.print(
               detailsFont,
               0,
-              0,
+              imageHeight - descriptionTextHeight - authorTextHeight,
               {
                 text: quote.author,
                 alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
                 alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
               },
-              quoteMaxWidth + 80
+              quoteMaxWidth
             );
           }
 
           if (quote.description) {
-            detailsImage.print(
+            image.print(
               detailsFont,
               0,
-              authorTextHeight,
+              imageHeight - descriptionTextHeight,
               {
                 text: quote.description,
                 alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
                 alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
               },
-              quoteMaxWidth + 80
+              quoteMaxWidth
             );
           }
+          // detailsImage.color([{ apply: "xor", params: ["#ffffff"] }]);
 
-          detailsImage.color([{ apply: "xor", params: ["#ffffff"] }]);
+          // background.composite(
+          //   detailsImage,
+          //   margin.left,
+          //   height - margin.bottom
+          // );
         }
       }
 
-      image.composite(
-        quoteImage,
-        80,
-        height / 2 - quoteHeight / 2 - detailsTotalHeight / 2
+      let quoteFont = null;
+      let quoteHeight = 0;
+
+      const maxQuoteHeight = imageHeight - detailHeight - 100;
+
+      for (const font of fonts) {
+        const textHeight = Jimp.measureTextHeight(
+          font,
+          quoteText,
+          quoteMaxWidth
+        );
+
+        if (textHeight < maxQuoteHeight && textHeight > quoteHeight) {
+          quoteFont = font;
+          quoteHeight = textHeight;
+        }
+      }
+
+      image.print(
+        quoteFont,
+        0,
+        imageHeight / 2 - maxQuoteHeight / 2,
+        {
+          text: quoteText,
+          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
+        },
+        quoteMaxWidth
       );
 
-      if (detailsImage) {
-        image.composite(detailsImage, 0, height / 2 + quoteHeight / 2);
-      }
+      image.color([{ apply: "xor", params: ["#ffffff"] }]);
+
+      background.composite(image, margin.left, margin.top);
 
       const exportPath = join(renderPath, quote.id + "");
 
       mkdirSync(exportPath);
 
-      await image.writeAsync(join(exportPath, "image.png"));
+      await background.writeAsync(join(exportPath, "image.png"));
 
       console.log("image-generated");
     }
   } catch (error) {
-    console.log(error);
+    // console.log(error);
   }
 };
 

@@ -1,4 +1,4 @@
-import { execFileSync } from "child_process";
+import { execSync } from "child_process";
 import { writeFileSync } from "fs";
 import { join } from "path";
 
@@ -37,6 +37,7 @@ export const addBackgroundMusic: AddBackgroundMusic = async ({
   });
 
   const argz = [
+    ffmpeg,
     "-i",
     join(renderPath, "music.wav"),
     "-filter:a",
@@ -45,12 +46,13 @@ export const addBackgroundMusic: AddBackgroundMusic = async ({
   ];
 
   try {
-    execFileSync(ffmpeg, argz, { stdio: "pipe" });
+    execSync(argz.join(" "), { stdio: "pipe" });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
   }
 
   const arg = [
+    ffmpeg,
     "-y",
     "-i",
     videoPath,
@@ -71,12 +73,10 @@ export const addBackgroundMusic: AddBackgroundMusic = async ({
   ];
 
   try {
-    execFileSync(ffmpeg, arg, { stdio: "pipe" });
+    execSync(arg.join(" "), { stdio: "pipe" });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
   }
-
-  // console.log("process-video-done");
 };
 
 type GenerateVideo = (args: {
@@ -102,6 +102,7 @@ export const generateVideo: GenerateVideo = ({
   const ffmpeg = getArgument("FFMPEG") ?? "ffmpeg";
 
   const args = [
+    ffmpeg,
     "-loop",
     "1",
     "-framerate",
@@ -127,7 +128,7 @@ export const generateVideo: GenerateVideo = ({
   ];
 
   try {
-    execFileSync(ffmpeg, args, { stdio: "pipe" });
+    execSync(args.join(" "), { stdio: "pipe" });
   } catch (error) {
     // console.log(error);
   }
@@ -152,6 +153,7 @@ export const mergeFiles: MergeFiles = ({
   const ffmpeg = getArgument("FFMPEG") ?? "ffmpeg";
 
   const args = [
+    ffmpeg,
     "-safe",
     "0",
     "-f",
@@ -164,7 +166,7 @@ export const mergeFiles: MergeFiles = ({
   ];
 
   try {
-    execFileSync(ffmpeg, args, { stdio: "pipe" });
+    execSync(args.join(" "), { stdio: "pipe" });
   } catch (error) {
     // console.log(error);
   }

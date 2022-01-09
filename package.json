@@ -9,7 +9,7 @@
     "build:app": "rm -rf build dist && tsc -p . && npm run copy:assets",
     "build:exe": "rm -rf ./reddit-video-creator.exe && pkg .",
     "build": "npm run build:app && npm run build:exe",
-    "start": "npm run build:app && node ./build/index.js CONTENT=./content.json VOICE=Lee BALCON=C:\\Users\\gjonl\\Desktop\\Dev\\quotes-creator\\cli\\balcon.exe",
+    "start": "npm run build:app && node ./build/index.js CONTENT=./content.json VOICE=Lee",
     "test": "node test/index.js"
   },
   "keywords": [],
