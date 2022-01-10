@@ -133,3 +133,21 @@ merr imazhe dhe quota te nji personi dhe krijo video
     "The Most Powerful Quotes About Life by Mark Twain",
     "The Best Quotes by Erich Maria Remarque"
 ]
+
+
+[]. create spider 
+    []. scrape all authors
+    []. scrape authors quotes
+
+[]. clean up data
+    []. review bad words quotes
+
+[]. title creator 
+    []. krijo textin sipas nje strukture
+    []. psh: word word description. author word? word??. | Quotes, Wise Thoughts
+
+[]. krijo foto per autoret 
+
+[]. make auto uploader per youtube ?
+
+[]. posto content per 1 vit

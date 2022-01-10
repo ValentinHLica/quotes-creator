@@ -27,3 +27,5 @@ build
 *.exe
 *.mp4
 content
+authors.json
+test.json

@@ -16,6 +16,8 @@
   "author": "Valentin Lica",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.10",
     "clone-class": "^1.0.3",
     "jimp": "^0.16.1",
     "pkg": "^5.5.1"

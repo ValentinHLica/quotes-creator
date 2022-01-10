@@ -1,25 +1,36 @@
-import generateImage from "./image/index";
-import generateAudio from "./audio/index";
-import generateVideo from "./video/index";
+// import generateImage from "./image/index";
+// import generateAudio from "./audio/index";
+// import generateVideo from "./video/index";
 
-import { resetTemp } from "./utils/helper";
+import { readFileSync, writeFileSync } from "fs";
+import { getAuthorQuotes } from "./scraper/lib";
 
-const render = async () => {
-  console.time("Render");
+// import { resetTemp } from "./utils/helper";
 
-  // Reset Temp
-  resetTemp();
+// const render = async () => {
+//   console.time("Render");
 
-  // Generate Image
-  await generateImage();
+//   // Reset Temp
+//   resetTemp();
 
-  // // Generate Audio
-  await generateAudio();
+//   // Generate Image
+//   await generateImage();
 
-  // // Generate Video
-  await generateVideo();
+//   // // Generate Audio
+//   await generateAudio();
 
-  console.timeEnd("Render");
+//   // // Generate Video
+//   await generateVideo();
+
+//   console.timeEnd("Render");
+// };
+
+// render();
+
+const test = async () => {
+  const quotes = await getAuthorQuotes("plato-quotes");
+
+  writeFileSync("./test.json", JSON.stringify(quotes));
 };
 
-render();
+test();
