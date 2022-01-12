@@ -151,3 +151,16 @@ merr imazhe dhe quota te nji personi dhe krijo video
 []. make auto uploader per youtube ?
 
 []. posto content per 1 vit
+
+
+
+C:\Users\licav\Desktop\Dev\quotes-creator\test\list.txt
+
+bal4web -s a -l en-US -g m -n Matthew -fl ./list.txt -w ./audio.wav
+
+use new voice
+
+beje me user interface
+1.merr krejt db
+2.krijo nje ui
+3.beje qe krijimi i videos te behet manualisht nga use (implementohet nga ana e front end per auto render)

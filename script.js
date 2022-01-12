@@ -21,3 +21,19 @@ document
   });
 
 copy(quotes);
+
+const authors = [];
+
+document
+  .querySelectorAll("div.bq_fl.indexContent.authorContent a.bq_on_link_cl")
+  .forEach((item) => {
+    const url = item.getAttribute("href");
+    const name = item.textContent;
+
+    authors.push({
+      url,
+      name,
+    });
+  });
+
+copy(authors);

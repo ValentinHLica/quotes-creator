@@ -2,7 +2,7 @@ import { writeFileSync } from "fs";
 import { join } from "path";
 import cluster from "cluster";
 
-import { renderPath, tempPath } from "../config/paths";
+import { tempPath } from "../config/paths";
 
 import { getContent, spreadWork } from "../utils/helper";
 

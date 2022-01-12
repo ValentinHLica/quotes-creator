@@ -196,3 +196,13 @@ export const spreadWork = <T extends unknown>(work: T[]): T[][] => {
 
   return workSpreed;
 };
+
+export const timeOut = (callBack: () => void, time: number) => {
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      callBack();
+
+      resolve(null);
+    }, time);
+  });
+};

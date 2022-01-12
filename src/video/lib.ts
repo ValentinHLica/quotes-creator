@@ -36,44 +36,22 @@ export const addBackgroundMusic: AddBackgroundMusic = async ({
     title: "music",
   });
 
-  const argz = [
-    ffmpeg,
-    "-i",
-    join(renderPath, "music.wav"),
-    "-filter:a",
-    "volume=0.05",
-    backgroundAudioPath,
-  ];
+  const audioOutputPath = join(renderPath, "music.wav");
+
+  const audioCommand = `${ffmpeg} -i ${audioOutputPath} -filter:a volume=0.05 ${backgroundAudioPath}`;
 
   try {
-    execSync(argz.join(" "), { stdio: "pipe" });
+    execSync(audioCommand, { stdio: "pipe" });
   } catch (error) {
     // console.log(error);
   }
 
-  const arg = [
-    ffmpeg,
-    "-y",
-    "-i",
-    videoPath,
-    "-i",
-    backgroundAudioPath,
-    "-filter_complex",
-    "[0:a][1:a]amerge=inputs=2[a]",
-    "-map",
-    "0:v",
-    "-map",
-    "[a]",
-    "-c:v",
-    "copy",
-    "-ac",
-    "2",
-    "-shortest",
-    join(outputPath, "video.mp4"),
-  ];
+  const exportPath = join(outputPath, "video.mp4");
+
+  const command = `${ffmpeg} -y -i ${videoPath} -i ${backgroundAudioPath} -filter_complex "[0:a][1:a]amerge=inputs=2[a]" -map 0:v -map [a] -c:v copy -ac 2 -shortest ${exportPath}`;
 
   try {
-    execSync(arg.join(" "), { stdio: "pipe" });
+    execSync(command, { stdio: "pipe" });
   } catch (error) {
     // console.log(error);
   }
@@ -101,34 +79,13 @@ export const generateVideo: GenerateVideo = ({
 }) => {
   const ffmpeg = getArgument("FFMPEG") ?? "ffmpeg";
 
-  const args = [
-    ffmpeg,
-    "-loop",
-    "1",
-    "-framerate",
-    "5",
-    "-i",
-    image,
-    "-i",
-    audio,
-    "-tune",
-    "stillimage",
-    "-c:a",
-    "aac",
-    "-b:a",
-    "192k",
-    "-shortest",
-    "-pix_fmt",
-    "yuv420p",
-    "-c:v",
-    "libx264",
-    "-t",
-    duration.toString(),
-    join(exportPath, `${title ?? "video"}.mp4`),
-  ];
+  const time = duration.toString();
+  const outputPath = join(exportPath, `${title ?? "video"}.mp4`);
+
+  const command = `${ffmpeg} -loop 1 -framerate 5 -i ${image} -i ${audio} -tune stillimage -c:a aac -b:a 192k -shortest -pix_fmt yuv420p -c:v libx264 -t ${time} ${outputPath}`;
 
   try {
-    execSync(args.join(" "), { stdio: "pipe" });
+    execSync(command, { stdio: "pipe" });
   } catch (error) {
     // console.log(error);
   }
@@ -152,21 +109,15 @@ export const mergeFiles: MergeFiles = ({
 }) => {
   const ffmpeg = getArgument("FFMPEG") ?? "ffmpeg";
 
-  const args = [
-    ffmpeg,
-    "-safe",
-    "0",
-    "-f",
-    "concat",
-    "-i",
-    listPath,
-    "-c",
-    "copy",
-    join(exportPath, `${title ?? "video"}.${video ? "mp4" : "wav"}`),
-  ];
+  const outputPath = join(
+    exportPath,
+    `${title ?? "video"}.${video ? "mp4" : "wav"}`
+  );
+
+  const args = `${ffmpeg} -safe 0 -f concat -i ${listPath} -c copy ${outputPath}`;
 
   try {
-    execSync(args.join(" "), { stdio: "pipe" });
+    execSync(args, { stdio: "pipe" });
   } catch (error) {
     // console.log(error);
   }
