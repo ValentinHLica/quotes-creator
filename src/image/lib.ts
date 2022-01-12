@@ -194,11 +194,7 @@ export const createQuotes = async (quotes: Quote[]) => {
 
       background.composite(image, margin.left, margin.top);
 
-      const exportPath = join(renderPath, quote.id + "");
-
-      mkdirSync(exportPath);
-
-      await background.writeAsync(join(exportPath, "image.png"));
+      await background.writeAsync(join(renderPath, `${quote.id}-image.png`));
 
       console.log("image-generated");
     }
@@ -209,15 +205,13 @@ export const createQuotes = async (quotes: Quote[]) => {
 
 export const createOutroImage = async () => {
   const { assets } = getContent();
-  const outroPath = join(renderPath, "outro");
-
-  mkdirSync(outroPath);
+  const id = "outro";
 
   const outro =
     "Make sure to subscribe and turn on notification, See you on another video, Bye";
 
   // Generate Audio File
-  const textFilePath = join(outroPath, "text.txt");
+  const textFilePath = join(renderPath, `${id}-text.txt`);
 
   writeFileSync(textFilePath, outro);
 
@@ -254,7 +248,5 @@ export const createOutroImage = async () => {
 
   image.composite(outroTextImage, width / 2 - outroTextWidth / 2, 150);
 
-  const imagePath = join(outroPath, "image.png");
-
-  await image.writeAsync(imagePath);
+  await image.writeAsync(join(renderPath, `${id}-image.png`));
 };

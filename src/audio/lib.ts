@@ -37,6 +37,7 @@ type GenerateAudioFile = (args: {
   textFilePath: string;
   exportPath: string;
   voice?: string;
+  id: number | string;
 }) => void;
 
 /**
@@ -46,17 +47,16 @@ export const generateAudioFile: GenerateAudioFile = async ({
   textFilePath,
   exportPath,
   voice,
+  id,
 }) => {
   let selectedVoice = voice ?? getVoice();
 
   const balcon = getArgument("BALCON") ?? "balcon";
 
-  const audioPath = join(exportPath, "audio.wav");
-  const subtitlePath = join(exportPath, "subtitle.srt");
+  const audioPath = join(exportPath, `${id}-audio.wav`);
+  const subtitlePath = join(exportPath, `${id}-subtitle.srt`);
 
   const command = `${balcon} -f "${textFilePath}" -w "${audioPath}" -n ${selectedVoice} -s -1 --lrc-length 400 --srt-length 400 -srt --srt-enc utf8 --srt-fname "${subtitlePath}" --ignore-url --silence-begin 400 --silence-end 1000"`;
-
-  // const command = `bal4web -s a -l en-US -g m -n Matthew -f "${textFilePath}" -w "${audioPath}" --lrc-length 400 --srt-length 400 -srt --srt-enc utf8 --srt-fname "${subtitlePath}" --ignore-url`;
 
   try {
     execSync(command, { stdio: "pipe" });

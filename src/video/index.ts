@@ -1,11 +1,8 @@
 import cluster from "cluster";
 import { join } from "path";
-import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, writeFileSync } from "fs";
 
-import Jimp from "jimp";
-
-import { assetsPath, renderPath, tempPath } from "../config/paths";
-import { resolution } from "../config/image";
+import { renderPath, tempPath } from "../config/paths";
 
 import { generateAudioFile } from "../audio/lib";
 import { createOutroImage } from "../image/lib";
@@ -18,23 +15,25 @@ import {
 import { addBackgroundMusic, generateVideo, mergeFiles } from "./lib";
 
 const createOutro = async () => {
-  const outroPath = join(renderPath, "outro");
-  const imagePath = join(outroPath, "image.png");
-  const textFilePath = join(outroPath, "text.txt");
+  const id = "outro";
+
+  const imagePath = join(renderPath, `${id}-image.png`);
+  const textFilePath = join(renderPath, `${id}-text.txt`);
 
   await createOutroImage();
 
   generateAudioFile({
-    exportPath: outroPath,
+    exportPath: renderPath,
     textFilePath,
+    id: "outro",
   });
 
-  const duration = getDuration(join(outroPath, "subtitle.srt"));
+  const duration = getDuration(join(renderPath, `${id}-subtitle.srt`));
 
   generateVideo({
-    exportPath: outroPath,
+    exportPath: renderPath,
     image: imagePath,
-    audio: join(outroPath, "audio.wav"),
+    audio: join(renderPath, `${id}-audio.wav`),
     title: "outro",
     duration,
   });
@@ -42,16 +41,18 @@ const createOutro = async () => {
 
 const generateQuoteVideo = async () => {
   return new Promise((resolve) => {
-    const folders = getFolders(renderPath).filter((e) => {
-      const audioPath = join(renderPath, e, "audio.wav");
-      const imagePath = join(renderPath, e, "image.png");
+    const { quotes } = getContent();
+
+    const quotesList = quotes.filter((e) => {
+      const audioPath = join(renderPath, `${e.id}-audio.wav`);
+      const imagePath = join(renderPath, `${e.id}-image.png`);
 
       if (existsSync(audioPath) && existsSync(imagePath)) {
         return e;
       }
     });
 
-    const work = spreadWork(folders);
+    const work = spreadWork(quotesList);
     let counter = work.length;
 
     for (let index = 0; index < work.length; index++) {
@@ -80,17 +81,16 @@ const generateQuoteVideo = async () => {
 };
 
 const mergeQuotes = async () => {
-  const outroPath = join(renderPath, "outro");
-  const folders = getFolders(renderPath);
+  const { quotes } = getContent();
 
   const listPath = join(renderPath, "list.txt");
 
-  const videos = folders
-    .filter((folder) => {
-      return existsSync(join(renderPath, folder, "video.mp4"));
+  const videos = quotes
+    .filter((quote) => {
+      return existsSync(join(renderPath, `${quote.id}-video.mp4`));
     })
-    .map((folder) => `file '${join(renderPath, folder, "video.mp4")}'`)
-    .concat(`file '${join(outroPath, "outro.mp4")}'`);
+    .map((quote) => `file '${join(renderPath, `${quote.id}-video.mp4`)}'`)
+    .concat(`file '${join(renderPath, "outro.mp4")}'`);
 
   writeFileSync(listPath, videos.join(" \n"));
 

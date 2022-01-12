@@ -15,15 +15,15 @@ const init = async () => {
   const quotes = JSON.parse(readFileSync(quotesPath).toString()) as Quote[];
 
   for (const quote of quotes) {
-    const exportPath = join(renderPath, quote.id + "");
-    const textFilePath = join(exportPath, "text.txt");
+    const textFilePath = join(renderPath, `${quote.id}-text.txt`);
 
     writeFileSync(textFilePath, quote.text);
 
     generateAudioFile({
-      exportPath,
+      exportPath: renderPath,
       textFilePath,
       voice,
+      id: quote.id,
     });
 
     console.log("audio-generated");

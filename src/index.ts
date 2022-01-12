@@ -13,10 +13,10 @@ const render = async () => {
   // Generate Image
   await generateImage();
 
-  // // Generate Audio
+  // Generate Audio
   await generateAudio();
 
-  // // Generate Video
+  // Generate Video
   await generateVideo();
 
   console.timeEnd("Render");
