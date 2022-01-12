@@ -54,7 +54,7 @@ export const generateAudioFile: GenerateAudioFile = async ({
   const audioPath = join(exportPath, "audio.wav");
   const subtitlePath = join(exportPath, "subtitle.srt");
 
-  const command = `${balcon} -f "${textFilePath}" -w "${audioPath}" -n ${selectedVoice} -s -3 --lrc-length 400 --srt-length 400 -srt --srt-enc utf8 --srt-fname "${subtitlePath}" --ignore-url --silence-begin 400 --silence-end 1000"`;
+  const command = `${balcon} -f "${textFilePath}" -w "${audioPath}" -n ${selectedVoice} -s -1 --lrc-length 400 --srt-length 400 -srt --srt-enc utf8 --srt-fname "${subtitlePath}" --ignore-url --silence-begin 400 --silence-end 1000"`;
 
   // const command = `bal4web -s a -l en-US -g m -n Matthew -f "${textFilePath}" -w "${audioPath}" --lrc-length 400 --srt-length 400 -srt --srt-enc utf8 --srt-fname "${subtitlePath}" --ignore-url`;
 
