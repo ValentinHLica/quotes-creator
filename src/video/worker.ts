@@ -12,16 +12,15 @@ const init = async () => {
   const quotes = JSON.parse(readFileSync(args[0]).toString()) as Quote[];
 
   for (const quote of quotes) {
-    const audioDuration = getDuration(
-      join(renderPath, `${quote.id}-subtitle.srt`)
-    );
+    const audioPath = join(renderPath, `${quote.id}-audio.wav`);
+    const audioDuration = getDuration(audioPath);
 
     if (audioDuration) {
       generateVideo({
         image: join(renderPath, `${quote.id}-image.png`),
-        audio: join(renderPath, `${quote.id}-audio.wav`),
+        audio: audioPath,
         exportPath: renderPath,
-        duration: audioDuration + 1,
+        duration: audioDuration,
         title: `${quote.id}-video`,
       });
     }

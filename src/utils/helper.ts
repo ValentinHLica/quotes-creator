@@ -1,4 +1,5 @@
 import { cpus } from "os";
+import { execSync } from "child_process";
 import {
   mkdirSync,
   existsSync,
@@ -12,7 +13,7 @@ import { join } from "path";
 
 import { dataPath, renderPath, tempPath } from "../config/paths";
 import { Arguments } from "../interface/utils";
-import { Content } from "../interface/content";
+import { Content, Quote } from "../interface/content";
 
 /**
  * Create Random String
@@ -119,47 +120,18 @@ export const slugify = (title: string) => {
 };
 
 /**
- * Parse Subtitle Time Format 00:01:00,1 into seconds
- */
-const parseTime = (time: string): number => {
-  const timer = time.split(":");
-  let timeCount = 0;
-
-  for (let i = 0; i < timer.length; i++) {
-    const time = timer[i];
-
-    switch (i) {
-      case 0:
-        timeCount += Number(time) * 3600; // Hours
-        break;
-
-      case 1:
-        timeCount += Number(time) * 60; // Minutes
-        break;
-
-      case 2:
-        timeCount += parseFloat(time.replace(",", ".")); // Seconds
-        break;
-    }
-  }
-
-  return timeCount;
-};
-
-/**
  * Get Subtitle duration
  */
-export const getDuration = (subtitlePath: string) => {
-  const subtitle = readFileSync(subtitlePath).toString();
+export const getDuration = (audioPath: string) => {
+  const ffprobe = getArgument("FFPROBE") ?? "ffprobe";
 
-  const arr = subtitle
-    .trim()
-    .split("\r\n")
-    .filter((e) => e !== "");
+  const args = `${ffprobe} -i "${audioPath}" -show_entries format=duration -v quiet -of csv="p=0"`;
 
-  const time = arr[arr.length - 2].split("-->").map((e) => e.trim());
-
-  return parseTime(time[1]);
+  try {
+    return execSync(args, { stdio: "pipe" }).toString().trim();
+  } catch (error) {
+    // console.log(error);
+  }
 };
 
 /**
@@ -197,12 +169,23 @@ export const spreadWork = <T extends unknown>(work: T[]): T[][] => {
   return workSpreed;
 };
 
-export const timeOut = (callBack: () => void, time: number) => {
-  return new Promise((resolve) => {
-    setTimeout(async () => {
-      callBack();
+export const generateTitle = (quote: Quote): string => {
+  const words = [
+    "The Best Quotes by {author}",
+    "The Most Powerful Quotes by {author}",
+    "Thoughtful {author} Quotes",
+    "The Wisest {author} Quotes",
+    "Wise Quotes by {author}",
+    "Quotes by {author}",
+    "Inspirational {author} Quotes",
+    "{author}'s Excellent Quotes",
+    "{author}'s Best Quotes",
+    "{author}'s Most Powerful Quotes",
+    "{author}'s Wisest Quotes",
+    "{author}'s Quotes",
+  ];
 
-      resolve(null);
-    }, time);
-  });
+  const randomTitle = Math.floor(Math.random() * words.length);
+
+  return words[randomTitle].replace("{author}", quote.author);
 };

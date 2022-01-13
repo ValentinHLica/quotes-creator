@@ -194,6 +194,10 @@ export const createQuotes = async (quotes: Quote[]) => {
 
       background.composite(image, margin.left, margin.top);
 
+      const textFilePath = join(renderPath, `${quote.id}-text.txt`);
+
+      writeFileSync(textFilePath, quote.text);
+
       await background.writeAsync(join(renderPath, `${quote.id}-image.png`));
 
       console.log("image-generated");

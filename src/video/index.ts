@@ -1,16 +1,15 @@
 import cluster from "cluster";
 import { join } from "path";
-import { existsSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 
 import { renderPath, tempPath } from "../config/paths";
 
-import { generateAudioFile } from "../audio/lib";
-import { createOutroImage } from "../image/lib";
 import {
   getContent,
   getDuration,
-  getFolders,
+  createRandomString,
   spreadWork,
+  generateTitle,
 } from "../utils/helper";
 import { addBackgroundMusic, generateVideo, mergeFiles } from "./lib";
 
@@ -18,22 +17,15 @@ const createOutro = async () => {
   const id = "outro";
 
   const imagePath = join(renderPath, `${id}-image.png`);
-  const textFilePath = join(renderPath, `${id}-text.txt`);
 
-  await createOutroImage();
+  const audioPath = join(renderPath, `${id}-text.wav`);
 
-  generateAudioFile({
-    exportPath: renderPath,
-    textFilePath,
-    id: "outro",
-  });
-
-  const duration = getDuration(join(renderPath, `${id}-subtitle.srt`));
+  const duration = getDuration(audioPath);
 
   generateVideo({
     exportPath: renderPath,
     image: imagePath,
-    audio: join(renderPath, `${id}-audio.wav`),
+    audio: audioPath,
     title: "outro",
     duration,
   });
@@ -98,7 +90,7 @@ const mergeQuotes = async () => {
 };
 
 export default async () => {
-  const { exportPath, assets } = getContent();
+  const { exportPath, assets, quotes } = getContent();
 
   // Generate video for each comment
   await generateQuoteVideo();
@@ -109,9 +101,17 @@ export default async () => {
   // Merge Videos
   await mergeQuotes();
 
+  const outputPath = join(exportPath, createRandomString(2));
+
+  mkdirSync(outputPath);
+
+  const titleFile = join(outputPath, "title.txt");
+
+  writeFileSync(titleFile, generateTitle(quotes[0]));
+
   addBackgroundMusic({
     videoPath: join(renderPath, "video.mp4"),
     audioPath: assets.audio,
-    outputPath: exportPath,
+    outputPath: outputPath,
   });
 };

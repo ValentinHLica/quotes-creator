@@ -62,7 +62,7 @@ type GenerateVideo = (args: {
   audio?: string;
   exportPath: string;
   title?: string;
-  duration: number;
+  duration: string;
 }) => void;
 
 /**
@@ -79,10 +79,9 @@ export const generateVideo: GenerateVideo = ({
 }) => {
   const ffmpeg = getArgument("FFMPEG") ?? "ffmpeg";
 
-  const time = duration.toString();
   const outputPath = join(exportPath, `${title ?? "video"}.mp4`);
 
-  const command = `${ffmpeg} -loop 1 -framerate 5 -i ${image} -i ${audio} -tune stillimage -c:a aac -b:a 192k -shortest -pix_fmt yuv420p -c:v libx264 -t ${time} ${outputPath}`;
+  const command = `${ffmpeg} -loop 1 -framerate 5 -i "${image}" -i "${audio}" -tune stillimage -c:a aac -b:a 192k -shortest -pix_fmt yuv420p -c:v libx264 -t ${duration} ${outputPath}`;
 
   try {
     execSync(command, { stdio: "pipe" });
