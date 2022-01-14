@@ -1,39 +1,31 @@
 {
-  "name": "daily-quotes",
+  "name": "quote-creator",
   "version": "1.0.0",
-  "description": "Create videos from quotes",
-  "main": "build/index.js",
-  "bin": "build/index.js",
+  "description": "Create videos from Quotes",
   "scripts": {
-    "copy:assets": "cp -R src/assets build",
-    "build:app": "rm -rf build dist && tsc -p . && npm run copy:assets",
-    "build:exe": "rm -rf ./reddit-video-creator.exe && pkg .",
-    "build": "npm run build:app && npm run build:exe",
-    "start": "node ./build/index.js CONTENT=./content.json",
-    "audio": "npm run build:app && node ./build/index.js CONTENT=./content.json AUDIO=true"
+    "start": "remotion preview src/index.tsx",
+    "build": "remotion render src/index.tsx Quote out/video.mp4",
+    "upgrade": "remotion upgrade",
+    "test": "ts-node index.tsx",
+    "audio": "node audio.js",
+    "duration": "node audio.js AUDIO=true"
   },
-  "keywords": [],
-  "author": "Valentin Lica",
-  "license": "ISC",
+  "repository": {},
+  "license": "UNLICENSED",
   "dependencies": {
-    "axios": "^0.24.0",
-    "cheerio": "^1.0.0-rc.10",
-    "clone-class": "^1.0.3",
-    "jimp": "^0.16.1",
-    "pkg": "^5.5.1"
-  },
-  "pkg": {
-    "scripts": "build/**/*.js",
-    "targets": [
-      "node16-win-x64"
-    ],
-    "assets": [
-      "build/assets/**/*"
-    ],
-    "outputPath": "./"
+    "@remotion/bundler": "^2.6.3",
+    "@remotion/cli": "^2.6.3",
+    "@remotion/renderer": "^2.6.3",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "remotion": "^2.6.3",
+    "sass": "^1.45.2",
+    "sass-loader": "^12.4.0",
+    "ts-node": "^10.4.0",
+    "typescript": "4.4.2"
   },
   "devDependencies": {
-    "@types/node": "^16.11.12",
-    "typescript": "^4.5.3"
+    "@types/react": "^17.0.0",
+    "@types/web": "^0.0.46"
   }
 }

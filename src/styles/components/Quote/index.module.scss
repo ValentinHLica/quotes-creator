@@ -1,0 +1,23 @@
+.quote {
+  background-color: black;
+  color: white;
+
+  .text {
+    position: absolute;
+    left: 0;
+    max-width: 45%;
+    background-color: red;
+
+    svg {
+      width: 100%;
+      display: block;
+    }
+  }
+
+  .author {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    max-width: 45%;
+  }
+}
