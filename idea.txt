@@ -159,7 +159,18 @@ bal4web -s a -l en-US -g m -n Matthew -fl ./list.txt -w ./audio.wav
 
 use new voice
 
+
+
+
 beje me user interface
 1.merr krejt db
 2.krijo nje ui
 3.beje qe krijimi i videos te behet manualisht nga use (implementohet nga ana e front end per auto render)
+4.bej nje intro
+5.krijo effekte fade per text dhe intron/outro
+6.improve desing of the quotes
+7.filter the quotes
+8.duhet te kete nje folder plot backgrounde,font, dhe music
+9.improve thumbnail design
+10. intro perdor wikipedia dhe at spinnerin me ai.
+11. 

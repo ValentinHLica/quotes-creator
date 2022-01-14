@@ -19,7 +19,7 @@ export const addAudioFilter = () => {
     if (existsSync(audioPath) && existsSync(imagePath)) {
       try {
         execSync(
-          `${ffmpeg} -i ${audioPath} -af "apad=pad_dur=1,atempo=0.85" ${outputPath}`,
+          `${ffmpeg} -i ${audioPath} -af "apad=pad_dur=1" ${outputPath}`,
           { stdio: "pipe" }
         );
       } catch (error) {}

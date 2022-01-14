@@ -86,7 +86,7 @@ export const createQuotes = async (quotes: Quote[]) => {
     const backgroundImagePath = join(renderPath, "background.png");
 
     // Print Quote and details
-    const quoteMaxWidth = width / 1.7;
+    const quoteMaxWidth = width / 1.6;
     const fonts = await loadFonts();
     const margin = {
       top: 100,
