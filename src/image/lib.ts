@@ -46,12 +46,17 @@ export const createBackgroundImage = async (assets: QuoteAssets) => {
   // Add Background
   if (assets.background) {
     const backgroundImage = await Jimp.read(assets.background);
+    const blackLayerImage = await Jimp.read(
+      join(assetsPath, "black-layer.png")
+    );
 
     if (backgroundImage.getWidth() < backgroundImage.getHeight()) {
       backgroundImage.flip(true, false);
     }
 
     backgroundImage.cover(width, height);
+
+    backgroundImage.composite(blackLayerImage, 0, 0);
 
     image.composite(backgroundImage, 0, 0);
   }
@@ -86,35 +91,38 @@ export const createQuotes = async (quotes: Quote[]) => {
     const backgroundImagePath = join(renderPath, "background.png");
 
     // Print Quote and details
-    const quoteMaxWidth = width / 1.6;
+    const quoteMaxWidth = width / 2;
     const fonts = await loadFonts();
     const margin = {
       top: 100,
       right: 0,
       bottom: 100,
-      left: 80,
+      left: 150,
     };
 
     for (const quote of quotes) {
       const background = await Jimp.read(backgroundImagePath);
       const imageHeight = height - (margin.top + margin.bottom);
       const image = new Jimp(quoteMaxWidth, imageHeight);
-      const quoteText = `"${quote.text}"`;
+      const quoteText = `“${quote.text}”`;
 
       let detailHeight: number = 0;
 
       if (quote.author || quote.description) {
-        const detailsFont = await Jimp.loadFont(
-          join(assetsPath, "font", "40.fnt")
+        const authorFont = await Jimp.loadFont(
+          join(assetsPath, "font", "50.fnt")
+        );
+        const descriptionFont = await Jimp.loadFont(
+          join(assetsPath, "font", "description.fnt")
         );
 
         const authorTextHeight: number = quote.author
-          ? Jimp.measureTextHeight(detailsFont, quote.author, quoteMaxWidth)
+          ? Jimp.measureTextHeight(authorFont, quote.author, quoteMaxWidth)
           : 0;
 
         const descriptionTextHeight: number = quote.description
           ? Jimp.measureTextHeight(
-              detailsFont,
+              descriptionFont,
               quote.description,
               quoteMaxWidth
             )
@@ -125,7 +133,7 @@ export const createQuotes = async (quotes: Quote[]) => {
         if (detailHeight > 0) {
           if (quote.author) {
             image.print(
-              detailsFont,
+              authorFont,
               0,
               imageHeight - descriptionTextHeight - authorTextHeight,
               {
@@ -139,7 +147,7 @@ export const createQuotes = async (quotes: Quote[]) => {
 
           if (quote.description) {
             image.print(
-              detailsFont,
+              descriptionFont,
               0,
               imageHeight - descriptionTextHeight,
               {
@@ -150,20 +158,13 @@ export const createQuotes = async (quotes: Quote[]) => {
               quoteMaxWidth
             );
           }
-          // detailsImage.color([{ apply: "xor", params: ["#ffffff"] }]);
-
-          // background.composite(
-          //   detailsImage,
-          //   margin.left,
-          //   height - margin.bottom
-          // );
         }
       }
 
       let quoteFont = null;
       let quoteHeight = 0;
 
-      const maxQuoteHeight = imageHeight - detailHeight - 100;
+      const maxQuoteHeight = imageHeight - (detailHeight + 70);
 
       for (const font of fonts) {
         const textHeight = Jimp.measureTextHeight(
@@ -181,7 +182,7 @@ export const createQuotes = async (quotes: Quote[]) => {
       image.print(
         quoteFont,
         0,
-        imageHeight / 2 - maxQuoteHeight / 2,
+        maxQuoteHeight / 2 - quoteHeight / 2,
         {
           text: quoteText,
           alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
@@ -226,12 +227,16 @@ export const createOutroImage = async () => {
   // Add Background
   if (assets.background) {
     const backgroundImage = await Jimp.read(assets.background);
+    const blackLayerImage = await Jimp.read(
+      join(assetsPath, "black-layer.png")
+    );
 
     if (backgroundImage.getWidth() < backgroundImage.getHeight()) {
       backgroundImage.flip(true, false);
     }
 
     backgroundImage.cover(width, height);
+    backgroundImage.composite(blackLayerImage, 0, 0);
 
     image.composite(backgroundImage, 0, 0);
   }

@@ -10,7 +10,7 @@
     "build:exe": "rm -rf ./reddit-video-creator.exe && pkg .",
     "build": "npm run build:app && npm run build:exe",
     "start": "node ./build/index.js CONTENT=./content.json",
-    "audio": "npm run build:app && node ./build/index.js CONTENT=./content.json AUDIO=true"
+    "test": "npm run build:app && node ./build/index.js CONTENT=./content.json AUDIO=true"
   },
   "keywords": [],
   "author": "Valentin Lica",

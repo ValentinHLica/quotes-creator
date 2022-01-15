@@ -1,13 +1,6 @@
 https://www.youtube.com/watch?v=yqmu6xXioC8
 merr imazhe dhe quota te nji personi dhe krijo video
 
-
-8 Cpus:
-    1. Battery - Render: 1:07.505 (m:ss.mmm) - Render: 1:04.643 (m:ss.mmm)
-    2. Plug - Render: 47.689s
-
-
-
     [
     "The Best Quotes and Sayings by André Maurois That Change Your Views on Life",
     "Breathtaking Quotes By Bob Marley, That Amazes with their Wisdom | Wise Thoughts",
@@ -137,29 +130,11 @@ merr imazhe dhe quota te nji personi dhe krijo video
 []. create spider 
     []. scrape all authors
     []. scrape authors quotes
-
 []. clean up data
     []. review bad words quotes
-
-[]. title creator 
-    []. krijo textin sipas nje strukture
-    []. psh: word word description. author word? word??. | Quotes, Wise Thoughts
-
 []. krijo foto per autoret 
-
 []. make auto uploader per youtube ?
-
 []. posto content per 1 vit
-
-
-
-C:\Users\licav\Desktop\Dev\quotes-creator\test\list.txt
-
-bal4web -s a -l en-US -g m -n Matthew -fl ./list.txt -w ./audio.wav
-
-use new voice
-
-
 
 
 beje me user interface
@@ -172,5 +147,4 @@ beje me user interface
 7.filter the quotes
 8.duhet te kete nje folder plot backgrounde,font, dhe music
 9.improve thumbnail design
-10. intro perdor wikipedia dhe at spinnerin me ai.
-11. 
+10.intro perdor wikipedia dhe at spinnerin me ai.
