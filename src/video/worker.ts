@@ -1,5 +1,4 @@
 import { readFileSync } from "fs";
-import { Quote } from "interface/content";
 import { join } from "path";
 
 import { renderPath } from "../config/paths";
@@ -9,19 +8,22 @@ import { generateVideo } from "./lib";
 
 const init = async () => {
   const args = process.argv.slice(2);
-  const quotes = JSON.parse(readFileSync(args[0]).toString()) as Quote[];
+  const quotes = JSON.parse(readFileSync(args[0]).toString()) as {
+    e: string;
+    index: number;
+  }[];
 
   for (const quote of quotes) {
-    const audioPath = join(renderPath, `${quote.id}-audio.wav`);
+    const audioPath = join(renderPath, `${quote.index}-audio.wav`);
     const audioDuration = getDuration(audioPath);
 
     if (audioDuration) {
       generateVideo({
-        image: join(renderPath, `${quote.id}-image.png`),
+        image: join(renderPath, `${quote.index}-image.png`),
         audio: audioPath,
         exportPath: renderPath,
         duration: audioDuration,
-        title: `${quote.id}-video`,
+        title: `${quote.index}-video`,
       });
     }
 

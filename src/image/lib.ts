@@ -2,28 +2,33 @@ import { join } from "path";
 import { mkdirSync, readdirSync, writeFileSync } from "fs";
 
 import Jimp from "jimp";
+import { Font } from "@jimp/plugin-print";
 
 import { assetsPath, renderPath } from "../config/paths";
 import { resolution } from "../config/image";
-import { Quote, QuoteAssets } from "../interface/content";
+import { margin } from "../config/image";
 
 import { getContent } from "../utils/helper";
 
-export const createBackgroundImage = async (assets: QuoteAssets) => {
+export const createBackgroundImage = async () => {
+  const {
+    assets: { background, avatar, audio },
+  } = getContent();
+
   const { width, height } = resolution;
 
   // Check Requirements
   const requirements = [
     {
-      value: assets.background,
+      value: background,
       name: "Background Image",
     },
     {
-      value: assets.avatar,
+      value: avatar,
       name: "Avatar Image",
     },
     {
-      value: assets.audio,
+      value: audio,
       name: "Audio Track",
     },
   ];
@@ -44,8 +49,8 @@ export const createBackgroundImage = async (assets: QuoteAssets) => {
   const image = new Jimp(width, height, "#000000");
 
   // Add Background
-  if (assets.background) {
-    const backgroundImage = await Jimp.read(assets.background);
+  if (background) {
+    const backgroundImage = await Jimp.read(background);
     const blackLayerImage = await Jimp.read(
       join(assetsPath, "black-layer.png")
     );
@@ -62,7 +67,7 @@ export const createBackgroundImage = async (assets: QuoteAssets) => {
   }
 
   // Add Author Image
-  const authorImage = await Jimp.read(assets.avatar);
+  const authorImage = await Jimp.read(avatar);
   const authorImageWidth = 870;
 
   authorImage.resize(authorImageWidth, Jimp.AUTO);
@@ -75,16 +80,56 @@ export const createBackgroundImage = async (assets: QuoteAssets) => {
 };
 
 const loadFonts = async () => {
-  const fonts = readdirSync(join(assetsPath, "font")).filter((e) =>
+  const fonts = readdirSync(join(assetsPath, "font", "text")).filter((e) =>
     e.endsWith(".fnt")
   );
 
   return Promise.all(
-    fonts.map((font) => Jimp.loadFont(join(assetsPath, "font", font)))
+    fonts.map((font) => Jimp.loadFont(join(assetsPath, "font", "text", font)))
   );
 };
 
-export const createQuotes = async (quotes: Quote[]) => {
+type GetFont = (args: {
+  fontFace?: string;
+  text?: string;
+  width?: number;
+  height?: number;
+}) => Promise<Font>;
+
+const getFont: GetFont = async ({ fontFace, text, width, height }) => {
+  if (fontFace) {
+    return await Jimp.loadFont(
+      join(join(assetsPath, "font"), `${fontFace}.fnt`)
+    );
+  }
+
+  const fonts = await loadFonts();
+
+  let selectedFont: Font | null = null;
+  let maxHeight: number = 0;
+
+  for (const font of fonts) {
+    const textHeight = Jimp.measureTextHeight(font, text, width);
+
+    if (textHeight < height && textHeight > maxHeight) {
+      selectedFont = font;
+      maxHeight = textHeight;
+    }
+  }
+
+  return selectedFont;
+};
+
+type CreateQuotes = (args: {
+  quotes: string[];
+  author: string;
+  occupation: string;
+}) => Promise<void>;
+export const createQuotes: CreateQuotes = async ({
+  quotes,
+  author,
+  occupation,
+}) => {
   try {
     const { width, height } = resolution;
 
@@ -93,51 +138,43 @@ export const createQuotes = async (quotes: Quote[]) => {
     // Print Quote and details
     const quoteMaxWidth = width / 2;
     const fonts = await loadFonts();
-    const margin = {
-      top: 100,
-      right: 0,
-      bottom: 100,
-      left: 150,
-    };
 
-    for (const quote of quotes) {
+    for (let index = 0; index < quotes.length; index++) {
+      const quote = quotes[index];
+
       const background = await Jimp.read(backgroundImagePath);
       const imageHeight = height - (margin.top + margin.bottom);
       const image = new Jimp(quoteMaxWidth, imageHeight);
-      const quoteText = `“${quote.text}”`;
+      const quoteText = `“${quote}”`;
 
       let detailHeight: number = 0;
 
-      if (quote.author || quote.description) {
+      if (author || occupation) {
         const authorFont = await Jimp.loadFont(
-          join(assetsPath, "font", "50.fnt")
+          join(assetsPath, "font", "text", "50.fnt")
         );
-        const descriptionFont = await Jimp.loadFont(
+        const occupationFont = await Jimp.loadFont(
           join(assetsPath, "font", "description.fnt")
         );
 
-        const authorTextHeight: number = quote.author
-          ? Jimp.measureTextHeight(authorFont, quote.author, quoteMaxWidth)
+        const authorTextHeight: number = author
+          ? Jimp.measureTextHeight(authorFont, author, quoteMaxWidth)
           : 0;
 
-        const descriptionTextHeight: number = quote.description
-          ? Jimp.measureTextHeight(
-              descriptionFont,
-              quote.description,
-              quoteMaxWidth
-            )
+        const occupationTextHeight: number = occupation
+          ? Jimp.measureTextHeight(occupationFont, occupation, quoteMaxWidth)
           : 0;
 
-        detailHeight = authorTextHeight + descriptionTextHeight;
+        detailHeight = authorTextHeight + occupationTextHeight;
 
         if (detailHeight > 0) {
-          if (quote.author) {
+          if (author) {
             image.print(
               authorFont,
               0,
-              imageHeight - descriptionTextHeight - authorTextHeight,
+              imageHeight - occupationTextHeight - authorTextHeight,
               {
-                text: quote.author,
+                text: author,
                 alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
                 alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
               },
@@ -145,13 +182,13 @@ export const createQuotes = async (quotes: Quote[]) => {
             );
           }
 
-          if (quote.description) {
+          if (occupation) {
             image.print(
-              descriptionFont,
+              occupationFont,
               0,
-              imageHeight - descriptionTextHeight,
+              imageHeight - occupationTextHeight,
               {
-                text: quote.description,
+                text: occupation,
                 alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
                 alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
               },
@@ -195,16 +232,16 @@ export const createQuotes = async (quotes: Quote[]) => {
 
       background.composite(image, margin.left, margin.top);
 
-      const textFilePath = join(renderPath, `${quote.id}-text.txt`);
+      const textFilePath = join(renderPath, `${index}-text.txt`);
 
-      writeFileSync(textFilePath, quote.text);
+      writeFileSync(textFilePath, quote);
 
-      await background.writeAsync(join(renderPath, `${quote.id}-image.png`));
+      await background.writeAsync(join(renderPath, `${index}-image.png`));
 
       console.log("image-generated");
     }
   } catch (error) {
-    // console.log(error);
+    console.log(error);
   }
 };
 
@@ -241,7 +278,7 @@ export const createOutroImage = async () => {
     image.composite(backgroundImage, 0, 0);
   }
 
-  const font = await Jimp.loadFont(join(assetsPath, "font", "90.fnt"));
+  const font = await Jimp.loadFont(join(assetsPath, "font", "text", "90.fnt"));
 
   const outroText = `Thank you for watching`;
 
@@ -258,4 +295,92 @@ export const createOutroImage = async () => {
   image.composite(outroTextImage, width / 2 - outroTextWidth / 2, 150);
 
   await image.writeAsync(join(renderPath, `${id}-image.png`));
+};
+
+export const createIntroImage = async () => {
+  const {
+    details: { author, occupation },
+  } = getContent();
+
+  const backgroundImagePath = join(renderPath, "background.png");
+  const background = await Jimp.read(backgroundImagePath);
+
+  const { width, height } = resolution;
+  const contentMaxWidth = width / 2;
+  const contentMaxHeight = height - (margin.top + margin.bottom);
+
+  const contentImage = new Jimp(contentMaxWidth, contentMaxHeight);
+
+  // Write Author Name
+  const authorMaxHeight = 140;
+  const authorFont = await getFont({
+    text: author,
+    width: contentMaxWidth,
+    height: authorMaxHeight,
+  });
+
+  contentImage.print(
+    authorFont,
+    0,
+    0,
+    {
+      text: author,
+      alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
+      alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
+    },
+    contentMaxWidth,
+    authorMaxHeight
+  );
+
+  // Write Occupation
+  const occupationMaxHeight = 100;
+  const occupationFont = await getFont({
+    fontFace: "intro-occupation",
+  });
+
+  contentImage.print(
+    occupationFont,
+    0,
+    authorMaxHeight,
+    {
+      text: occupation,
+      alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
+      alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
+    },
+    contentMaxWidth,
+    occupationMaxHeight
+  );
+
+  // Composite Line
+  const lineImage = new Jimp(300, 5, "#000000");
+
+  contentImage.composite(
+    lineImage,
+    0,
+    authorMaxHeight + occupationMaxHeight + 70 / 2
+  );
+
+  // Write Description
+  // const descriptionFont = await getFont({
+  //   fontFace: "intro-description",
+  // });
+
+  // contentImage.print(
+  //   descriptionFont,
+  //   0,
+  //   authorMaxHeight + occupationMaxHeight + 70,
+  //   description,
+  //   contentMaxWidth,
+  //   contentMaxHeight - (authorMaxHeight + occupationMaxHeight)
+  // );
+
+  const introTextPath = join(renderPath, "intro-text.txt");
+
+  writeFileSync(introTextPath, `Quotes by ${author}`);
+
+  contentImage.color([{ apply: "xor", params: ["#ffffff"] }]);
+
+  background.composite(contentImage, margin.left, margin.top + 80);
+
+  await background.writeAsync(join(renderPath, "intro.png"));
 };

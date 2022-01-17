@@ -13,6 +13,24 @@ import {
 } from "../utils/helper";
 import { addBackgroundMusic, generateVideo, mergeFiles } from "./lib";
 
+const createIntro = async () => {
+  const id = "intro";
+
+  const imagePath = join(renderPath, `${id}.png`);
+
+  const audioPath = join(renderPath, `${id}-text.wav`);
+
+  const duration = getDuration(audioPath);
+
+  generateVideo({
+    exportPath: renderPath,
+    image: imagePath,
+    audio: audioPath,
+    title: "intro",
+    duration,
+  });
+};
+
 const createOutro = async () => {
   const id = "outro";
 
@@ -35,14 +53,16 @@ const generateQuoteVideo = async () => {
   return new Promise((resolve) => {
     const { quotes } = getContent();
 
-    const quotesList = quotes.filter((e) => {
-      const audioPath = join(renderPath, `${e.id}-audio.wav`);
-      const imagePath = join(renderPath, `${e.id}-image.png`);
+    const quotesList = quotes
+      .filter((e, index) => {
+        const audioPath = join(renderPath, `${index}-audio.wav`);
+        const imagePath = join(renderPath, `${index}-image.png`);
 
-      if (existsSync(audioPath) && existsSync(imagePath)) {
-        return e;
-      }
-    });
+        if (existsSync(audioPath) && existsSync(imagePath)) {
+          return e;
+        }
+      })
+      .map((e, index) => ({ e, index }));
 
     const work = spreadWork(quotesList);
     let counter = work.length;
@@ -78,22 +98,35 @@ const mergeQuotes = async () => {
   const listPath = join(renderPath, "list.txt");
 
   const videos = quotes
-    .filter((quote) => {
-      return existsSync(join(renderPath, `${quote.id}-video.mp4`));
+    .filter((_, index) => {
+      return existsSync(join(renderPath, `${index}-video.mp4`));
     })
-    .map((quote) => `file '${join(renderPath, `${quote.id}-video.mp4`)}'`)
-    .concat(`file '${join(renderPath, "outro.mp4")}'`);
+    .map((_, index) => `file '${join(renderPath, `${index}-video.mp4`)}'`);
 
-  writeFileSync(listPath, videos.join(" \n"));
+  writeFileSync(
+    listPath,
+    [
+      `file '${join(renderPath, "intro.mp4")}'`,
+      ...videos,
+      `file '${join(renderPath, "outro.mp4")}'`,
+    ].join(" \n")
+  );
 
   mergeFiles({ listPath, exportPath: renderPath });
 };
 
 export default async () => {
-  const { exportPath, assets, quotes } = getContent();
+  const {
+    exportPath,
+    assets,
+    details: { author },
+  } = getContent();
 
   // Generate video for each comment
   await generateQuoteVideo();
+
+  // Create Intro
+  await createIntro();
 
   // Create Outro
   await createOutro();
@@ -107,7 +140,7 @@ export default async () => {
 
   const titleFile = join(outputPath, "title.txt");
 
-  writeFileSync(titleFile, generateTitle(quotes[0]));
+  writeFileSync(titleFile, generateTitle(author));
 
   addBackgroundMusic({
     videoPath: join(renderPath, "video.mp4"),

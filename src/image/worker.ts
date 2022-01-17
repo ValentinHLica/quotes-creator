@@ -1,17 +1,17 @@
 import { readFileSync } from "fs";
 
-import { Quote } from "../interface/content";
-
 import { createQuotes } from "./lib";
 
 const init = async () => {
-  const { quotes } = JSON.parse(
+  const { quotes, author, occupation } = JSON.parse(
     readFileSync(process.argv.slice(2)[0]).toString()
   ) as {
-    quotes: Quote[];
+    quotes: string[];
+    author: string;
+    occupation: string;
   };
 
-  await createQuotes(quotes);
+  await createQuotes({ quotes, author, occupation });
 
   // Kill Worker
   process.exit();

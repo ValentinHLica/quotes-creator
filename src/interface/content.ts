@@ -1,18 +1,15 @@
 export interface QuoteAssets {
   avatar: string;
-  background?: string;
+  background: string;
   audio: string;
 }
 
-export interface Quote {
-  text: string;
-  author?: string;
-  description?: string;
-  id: number;
-}
-
 export interface Content {
-  quotes: Quote[];
+  quotes: string[];
   assets: QuoteAssets;
+  details: {
+    author: string;
+    occupation: string;
+  };
   exportPath: string;
 }

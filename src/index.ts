@@ -1,7 +1,11 @@
 import generateImage from "./image/index";
+import {
+  createBackgroundImage,
+  createIntroImage,
+  createOutroImage,
+} from "./image/lib";
 import generateVideo from "./video/index";
 import { addAudioFilter } from "./audio/lib";
-import { createOutroImage } from "./image/lib";
 
 import { resetTemp, getArgument } from "./utils/helper";
 
@@ -14,8 +18,12 @@ const render = async () => {
     // Reset Temp
     resetTemp();
 
+    await createBackgroundImage();
+
     // Generate Image
     await generateImage();
+
+    await createIntroImage();
 
     await createOutroImage();
   } else {

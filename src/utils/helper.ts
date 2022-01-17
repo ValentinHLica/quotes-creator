@@ -13,7 +13,7 @@ import { join } from "path";
 
 import { dataPath, renderPath, tempPath } from "../config/paths";
 import { Arguments } from "../interface/utils";
-import { Content, Quote } from "../interface/content";
+import { Content } from "../interface/content";
 
 /**
  * Create Random String
@@ -137,17 +137,8 @@ export const getDuration = (audioPath: string) => {
 /**
  * Get Post data
  */
-export const getContent = () => {
-  const { assets, quotes, exportPath } = JSON.parse(
-    readFileSync(getArgument("CONTENT")).toString()
-  ) as Content;
-
-  return {
-    assets,
-    quotes: quotes.map((e, index) => ({ ...e, id: index })),
-    exportPath,
-  };
-};
+export const getContent = () =>
+  JSON.parse(readFileSync(getArgument("CONTENT")).toString()) as Content;
 
 /**
  * Spread work count for each cluster
@@ -169,7 +160,7 @@ export const spreadWork = <T extends unknown>(work: T[]): T[][] => {
   return workSpreed;
 };
 
-export const generateTitle = (quote: Quote): string => {
+export const generateTitle = (author: string): string => {
   const words = [
     "The Best Quotes by {author}",
     "The Most Powerful Quotes by {author}",
@@ -187,5 +178,5 @@ export const generateTitle = (quote: Quote): string => {
 
   const randomTitle = Math.floor(Math.random() * words.length);
 
-  return words[randomTitle].replace("{author}", quote.author);
+  return words[randomTitle].replace("{author}", author);
 };

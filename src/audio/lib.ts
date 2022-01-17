@@ -11,15 +11,15 @@ export const addAudioFilter = () => {
 
   const ffmpeg = getArgument("FFMPEG") ?? "ffmpeg";
 
-  quotes.forEach((e) => {
-    const audioPath = join(renderPath, `${e.id}-text.wav`);
-    const imagePath = join(renderPath, `${e.id}-image.png`);
-    const outputPath = join(renderPath, `${e.id}-audio.wav`);
+  quotes.forEach((_, index) => {
+    const audioPath = join(renderPath, `${index}-text.wav`);
+    const imagePath = join(renderPath, `${index}-image.png`);
+    const outputPath = join(renderPath, `${index}-audio.wav`);
 
     if (existsSync(audioPath) && existsSync(imagePath)) {
       try {
         execSync(
-          `${ffmpeg} -i ${audioPath} -af "apad=pad_dur=1" ${outputPath}`,
+          `${ffmpeg} -i ${audioPath} -af "apad=pad_dur=1.3" ${outputPath}`,
           { stdio: "pipe" }
         );
       } catch (error) {}
