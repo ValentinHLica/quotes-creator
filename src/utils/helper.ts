@@ -137,8 +137,16 @@ export const getDuration = (audioPath: string) => {
 /**
  * Get Post data
  */
-export const getContent = () =>
-  JSON.parse(readFileSync(getArgument("CONTENT")).toString()) as Content;
+export const getContent = () => {
+  const data = JSON.parse(
+    readFileSync(getArgument("CONTENT")).toString()
+  ) as Content;
+
+  return {
+    ...data,
+    quotes: data.quotes.map((quote, index) => ({ quote, index })),
+  };
+};
 
 /**
  * Spread work count for each cluster

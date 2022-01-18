@@ -121,7 +121,7 @@ const getFont: GetFont = async ({ fontFace, text, width, height }) => {
 };
 
 type CreateQuotes = (args: {
-  quotes: string[];
+  quotes: { quote: string; index: number }[];
   author: string;
   occupation: string;
 }) => Promise<void>;
@@ -139,13 +139,11 @@ export const createQuotes: CreateQuotes = async ({
     const quoteMaxWidth = width / 2;
     const fonts = await loadFonts();
 
-    for (let index = 0; index < quotes.length; index++) {
-      const quote = quotes[index];
-
+    for (const quote of quotes) {
       const background = await Jimp.read(backgroundImagePath);
       const imageHeight = height - (margin.top + margin.bottom);
       const image = new Jimp(quoteMaxWidth, imageHeight);
-      const quoteText = `“${quote}”`;
+      const quoteText = `“${quote.quote}”`;
 
       let detailHeight: number = 0;
 
@@ -232,11 +230,11 @@ export const createQuotes: CreateQuotes = async ({
 
       background.composite(image, margin.left, margin.top);
 
-      const textFilePath = join(renderPath, `${index}-text.txt`);
+      const textFilePath = join(renderPath, `${quote.index}-text.txt`);
 
-      writeFileSync(textFilePath, quote);
+      writeFileSync(textFilePath, quote.quote);
 
-      await background.writeAsync(join(renderPath, `${index}-image.png`));
+      await background.writeAsync(join(renderPath, `${quote.index}-image.png`));
 
       console.log("image-generated");
     }
@@ -307,9 +305,8 @@ export const createIntroImage = async () => {
 
   const { width, height } = resolution;
   const contentMaxWidth = width / 2;
-  const contentMaxHeight = height - (margin.top + margin.bottom);
 
-  const contentImage = new Jimp(contentMaxWidth, contentMaxHeight);
+  const contentImage = new Jimp(contentMaxWidth, height);
 
   // Write Author Name
   const authorMaxHeight = 140;
@@ -380,7 +377,11 @@ export const createIntroImage = async () => {
 
   contentImage.color([{ apply: "xor", params: ["#ffffff"] }]);
 
-  background.composite(contentImage, margin.left, margin.top + 80);
+  background.composite(
+    contentImage,
+    margin.left,
+    height / 2 - (authorMaxHeight + occupationMaxHeight + 70 / 2) / 2
+  );
 
   await background.writeAsync(join(renderPath, "intro.png"));
 };

@@ -9,7 +9,7 @@ import { generateVideo } from "./lib";
 const init = async () => {
   const args = process.argv.slice(2);
   const quotes = JSON.parse(readFileSync(args[0]).toString()) as {
-    e: string;
+    quote: string;
     index: number;
   }[];
 

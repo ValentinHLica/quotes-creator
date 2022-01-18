@@ -6,7 +6,7 @@ const init = async () => {
   const { quotes, author, occupation } = JSON.parse(
     readFileSync(process.argv.slice(2)[0]).toString()
   ) as {
-    quotes: string[];
+    quotes: { quote: string; index: number }[];
     author: string;
     occupation: string;
   };

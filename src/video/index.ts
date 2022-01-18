@@ -53,16 +53,14 @@ const generateQuoteVideo = async () => {
   return new Promise((resolve) => {
     const { quotes } = getContent();
 
-    const quotesList = quotes
-      .filter((e, index) => {
-        const audioPath = join(renderPath, `${index}-audio.wav`);
-        const imagePath = join(renderPath, `${index}-image.png`);
+    const quotesList = quotes.filter((e, index) => {
+      const audioPath = join(renderPath, `${index}-audio.wav`);
+      const imagePath = join(renderPath, `${index}-image.png`);
 
-        if (existsSync(audioPath) && existsSync(imagePath)) {
-          return e;
-        }
-      })
-      .map((e, index) => ({ e, index }));
+      if (existsSync(audioPath) && existsSync(imagePath)) {
+        return e;
+      }
+    });
 
     const work = spreadWork(quotesList);
     let counter = work.length;
