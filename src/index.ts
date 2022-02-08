@@ -1,41 +1,21 @@
-import generateImage from "./image/index";
-import {
-  createBackgroundImage,
-  createIntroImage,
-  createOutroImage,
-} from "./image/lib";
-import generateVideo from "./video/index";
-import { addAudioFilter } from "./audio/lib";
+import generateImage from "./image";
+import generateVideo from "./video";
+import generateAudio from "./audio";
 
-import { resetTemp, getArgument } from "./utils/helper";
+import { resetTemp } from "./utils/helper";
 
 const render = async () => {
   console.time("Render");
 
-  const waitAudio = getArgument("AUDIO");
+  resetTemp();
 
-  if (waitAudio) {
-    // Reset Temp
-    resetTemp();
+  await generateImage();
 
-    await createBackgroundImage();
+  await generateAudio();
 
-    // Generate Image
-    await generateImage();
+  await generateVideo();
 
-    await createIntroImage();
-
-    await createOutroImage();
-  } else {
-    // Generate Audio
-    // await generateAudio();
-    addAudioFilter();
-
-    // Generate Video
-    await generateVideo();
-
-    console.timeEnd("Render");
-  }
+  console.timeEnd("Render");
 };
 
 render();

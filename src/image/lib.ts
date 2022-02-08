@@ -1,10 +1,10 @@
 import { join } from "path";
-import { mkdirSync, readdirSync, writeFileSync } from "fs";
+import { readdirSync, writeFileSync } from "fs";
 
 import Jimp from "jimp";
 import { Font } from "@jimp/plugin-print";
 
-import { assetsPath, renderPath } from "../config/paths";
+import { assetsPath, imagePath, renderPath, textPath } from "../config/paths";
 import { resolution } from "../config/image";
 import { margin } from "../config/image";
 
@@ -230,11 +230,9 @@ export const createQuotes: CreateQuotes = async ({
 
       background.composite(image, margin.left, margin.top);
 
-      const textFilePath = join(renderPath, `${quote.index}-text.txt`);
+      writeFileSync(textPath(quote.index), quote.quote);
 
-      writeFileSync(textFilePath, quote.quote);
-
-      await background.writeAsync(join(renderPath, `${quote.index}-image.png`));
+      await background.writeAsync(imagePath(quote.index));
 
       console.log("image-generated");
     }
@@ -251,9 +249,7 @@ export const createOutroImage = async () => {
     "Make sure to subscribe and turn on notification, See you on another video, Bye";
 
   // Generate Audio File
-  const textFilePath = join(renderPath, `${id}-text.txt`);
-
-  writeFileSync(textFilePath, outro);
+  writeFileSync(textPath(id), outro);
 
   const { width, height } = resolution;
 
@@ -299,6 +295,8 @@ export const createIntroImage = async () => {
   const {
     details: { author, occupation },
   } = getContent();
+
+  const id = "intro";
 
   const backgroundImagePath = join(renderPath, "background.png");
   const background = await Jimp.read(backgroundImagePath);
@@ -371,9 +369,7 @@ export const createIntroImage = async () => {
   //   contentMaxHeight - (authorMaxHeight + occupationMaxHeight)
   // );
 
-  const introTextPath = join(renderPath, "intro-text.txt");
-
-  writeFileSync(introTextPath, `Quotes by ${author}`);
+  writeFileSync(textPath(id), `Quotes by ${author}`);
 
   contentImage.color([{ apply: "xor", params: ["#ffffff"] }]);
 
@@ -383,5 +379,5 @@ export const createIntroImage = async () => {
     height / 2 - (authorMaxHeight + occupationMaxHeight + 70 / 2) / 2
   );
 
-  await background.writeAsync(join(renderPath, "intro.png"));
+  await background.writeAsync(imagePath(id));
 };

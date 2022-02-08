@@ -5,41 +5,25 @@ import cluster from "cluster";
 import { tempPath } from "../config/paths";
 
 import { getContent, spreadWork } from "../utils/helper";
-import {
-  createBackgroundImage,
-  createIntroImage,
-  createOutroImage,
-} from "./lib";
+import { addAudioFilter } from "./lib";
 
 export default async () => {
   return new Promise(async (resolve) => {
-    await createBackgroundImage();
+    const { quotes } = getContent();
 
-    await createIntroImage();
-
-    await createOutroImage();
-
-    const {
-      quotes,
-      details: { author, occupation },
-    } = getContent();
-
-    const work = spreadWork(quotes);
+    const work = spreadWork([
+      ...quotes.map((quote) => quote.index),
+      "intro",
+      "outro",
+    ]);
     let counter = work.length;
 
     for (let index = 0; index < work.length; index++) {
       const jobs = work[index];
 
-      const jobsFilePath = join(tempPath, "data", `${index}-quotes.json`);
+      const jobsFilePath = join(tempPath, "data", `${index}-audio.json`);
 
-      writeFileSync(
-        jobsFilePath,
-        JSON.stringify({
-          quotes: jobs,
-          author,
-          occupation,
-        })
-      );
+      writeFileSync(jobsFilePath, JSON.stringify(jobs));
 
       cluster.setupPrimary({
         exec: join(__dirname, "worker.js"),
@@ -52,6 +36,8 @@ export default async () => {
         counter--;
 
         if (counter === 0) {
+          addAudioFilter();
+
           resolve(null);
         }
       });

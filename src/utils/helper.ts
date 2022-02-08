@@ -120,15 +120,18 @@ export const slugify = (title: string) => {
 };
 
 /**
- * Get Subtitle duration
+ * Get File duration
  */
-export const getDuration = (audioPath: string) => {
-  const ffprobe = getArgument("FFPROBE") ?? "ffprobe";
-
-  const args = `${ffprobe} -i "${audioPath}" -show_entries format=duration -v quiet -of csv="p=0"`;
-
+export const getDuration = (filePath: string) => {
   try {
-    return execSync(args, { stdio: "pipe" }).toString().trim();
+    return Number(
+      execSync(
+        `ffprobe -i "${filePath}" -show_entries format=duration -v quiet -of csv="p=0"`,
+        { stdio: "pipe" }
+      )
+        .toString()
+        .trim()
+    );
   } catch (error) {
     // console.log(error);
   }
@@ -171,6 +174,11 @@ export const spreadWork = <T extends unknown>(work: T[]): T[][] => {
 export const generateTitle = (author: string): string => {
   const words = [
     "The Best Quotes by {author}",
+    "The Best Quotes and Sayings by {author}",
+    "Wise Quotes and Sayings by {author}",
+    "Delightful {author} Quotes and Sayings",
+    "Powerful {author} Quotes and Sayings",
+    "Breathtaking Quotes By {author}, That Amazes with their Wisdom",
     "The Most Powerful Quotes by {author}",
     "Thoughtful {author} Quotes",
     "The Wisest {author} Quotes",
@@ -184,7 +192,8 @@ export const generateTitle = (author: string): string => {
     "{author}'s Quotes",
   ];
 
-  const randomTitle = Math.floor(Math.random() * words.length);
-
-  return words[randomTitle].replace("{author}", author);
+  return words[Math.floor(Math.random() * words.length)].replace(
+    "{author}",
+    author
+  );
 };

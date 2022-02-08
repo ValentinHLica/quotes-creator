@@ -2,65 +2,41 @@ import cluster from "cluster";
 import { join } from "path";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 
-import { renderPath, tempPath } from "../config/paths";
+import {
+  audioPath,
+  imagePath,
+  renderPath,
+  tempPath,
+  videoPath,
+} from "../config/paths";
 
 import {
   getContent,
-  getDuration,
   createRandomString,
   spreadWork,
   generateTitle,
 } from "../utils/helper";
-import { addBackgroundMusic, generateVideo, mergeFiles } from "./lib";
-
-const createIntro = async () => {
-  const id = "intro";
-
-  const imagePath = join(renderPath, `${id}.png`);
-
-  const audioPath = join(renderPath, `${id}-text.wav`);
-
-  const duration = getDuration(audioPath);
-
-  generateVideo({
-    exportPath: renderPath,
-    image: imagePath,
-    audio: audioPath,
-    title: "intro",
-    duration,
-  });
-};
-
-const createOutro = async () => {
-  const id = "outro";
-
-  const imagePath = join(renderPath, `${id}-image.png`);
-
-  const audioPath = join(renderPath, `${id}-text.wav`);
-
-  const duration = getDuration(audioPath);
-
-  generateVideo({
-    exportPath: renderPath,
-    image: imagePath,
-    audio: audioPath,
-    title: "outro",
-    duration,
-  });
-};
+import { mergeFiles } from "./lib";
+import { addBackgroundMusic } from "../audio/lib";
 
 const generateQuoteVideo = async () => {
   return new Promise((resolve) => {
     const { quotes } = getContent();
 
-    const quotesList = quotes.filter((e, index) => {
-      const audioPath = join(renderPath, `${index}-audio.wav`);
-      const imagePath = join(renderPath, `${index}-image.png`);
-
-      if (existsSync(audioPath) && existsSync(imagePath)) {
-        return e;
-      }
-    });
+    const quotesList = [
+      ...quotes
+        .filter((e) => {
+          if (
+            existsSync(audioPath(e.index)) &&
+            existsSync(imagePath(e.index))
+          ) {
+            return e;
+          }
+        })
+        .map((e) => e.index),
+      "intro",
+      "outro",
+    ];
 
     const work = spreadWork(quotesList);
     let counter = work.length;
@@ -96,17 +72,15 @@ const mergeQuotes = async () => {
   const listPath = join(renderPath, "list.txt");
 
   const videos = quotes
-    .filter((_, index) => {
-      return existsSync(join(renderPath, `${index}-video.mp4`));
-    })
-    .map((_, index) => `file '${join(renderPath, `${index}-video.mp4`)}'`);
+    .filter(({ index }) => existsSync(videoPath(index)))
+    .map(({ index }) => `file '${videoPath(index)}'`);
 
   writeFileSync(
     listPath,
     [
-      `file '${join(renderPath, "intro.mp4")}'`,
+      `file '${videoPath("intro")}'`,
       ...videos,
-      `file '${join(renderPath, "outro.mp4")}'`,
+      `file '${videoPath("outro")}'`,
     ].join(" \n")
   );
 
@@ -122,12 +96,6 @@ export default async () => {
 
   // Generate video for each comment
   await generateQuoteVideo();
-
-  // Create Intro
-  await createIntro();
-
-  // Create Outro
-  await createOutro();
 
   // Merge Videos
   await mergeQuotes();
