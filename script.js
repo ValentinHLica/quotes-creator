@@ -15,6 +15,8 @@ document
 
 copy(quotes);
 
+// ffmpeg -i *.png -vf scale=1280:720 thumbnail.png
+
 const authors = [];
 
 document
